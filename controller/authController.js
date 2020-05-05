@@ -111,7 +111,7 @@ router.post('/login', async (req,res,next) => {
  */
 
 /**
- * @api {get} /auth/login Login User Account
+ * @api {post} /auth/login Login User Account
  * @apiName LoginUser
  * @apiGroup Auth
  * 
