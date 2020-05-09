@@ -2,8 +2,9 @@ const express = require('express')
 const router = express.Router()
 const joi = require('@hapi/joi')
 const User = require('../models/User')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const saltRounds = 12
+const jwt = require('jsonwebtoken')
 
 const schema = joi.object().keys({
     username: joi.string().regex(/(^[a-zA-Z0-9]+$)/).min(5).max(20).required(),
@@ -17,6 +18,7 @@ router.get('/', (req,res) => {
 })
 
 router.post('/signup', async (req,res,next) => {
+    // console.log('123')
     try {
         let result = schema.validate(req.body)
         if (result.error === undefined){
@@ -27,18 +29,19 @@ router.post('/signup', async (req,res,next) => {
                 result = result.value
                 const hashingPassword = await bcrypt.hash(result.password, saltRounds)
                 result.password = hashingPassword
-                await User.create(result)
-                res.json({
-                    message:'User Created',
-                    data:{
-                        username:result.username
-                    }
-                })
+                const {username} = await User.create(result)
+                const findIdByUsername = await User.findOne({username},{_id:1})
+                console.log(findIdByUsername)
+                res.locals.result = findIdByUsername
+                console.log(result)
+                next()
             }else{
-                const error = new Error('Username/Email Telah Digunakan');
-                next(error)
+                // const error = new Error('Username/Email Telah Digunakan');
+                res.locals.messageFail = 'Username/Email Telah Digunakan'
+                next()
             }
         }else{
+            console.log(result.error)
             next(result.error)
         }
     } catch (error) {
@@ -56,12 +59,18 @@ router.post('/login', async (req,res,next) => {
         if(checkAccount !== null){
             const comparePassword = await bcrypt.compare(password, checkAccount.password)
             if(comparePassword === true){
-                res.json({message:"Login Successfully"})
+                res.locals.messageSuccess = 'Login Successfully'
+                const payload = {_id:checkAccount._id,username:checkAccount.username}
+                const token = await jwt.sign(payload,process.env.JWT_TOKEN)
+                res.locals.result = {token:token}
+                next()
             }else{
-                res.json({message:"Check your username or password"})
+                res.locals.messageFail = 'Check your Username/Email & Password'
+                next()
             }
         }else{
-            res.json({message:"Check your username or password"})
+            res.locals.messageFail = 'Check your Username/Email & Password'
+            next()
         }
         // const checkPassword = await User.findOne()
         // res.json({
@@ -69,6 +78,7 @@ router.post('/login', async (req,res,next) => {
         //     checkAccount
         // })
     } catch (error) {
+        // res.status(500)
         next(error)
     }
 })

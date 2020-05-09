@@ -3,7 +3,8 @@ const middleware = require('./middleware/middleware')
 const volleyball = require('volleyball')
 const bodyparser = require('body-parser')
 const swagger = require('./swagger/index')
-
+const userController = require('./controller/userController')
+require('dotenv').config()
 require('./config/db')
 
 //Controller Import
@@ -13,7 +14,11 @@ const auth = require('./controller/authController')
 const app = express()
 
 //HTTP Request Logging
-app.use(volleyball)
+if (process.env.NODE_ENV == 'DEVELOPMENT') {
+    app.use(volleyball)
+}
+
+// app.use(volleyball)  
 
 //Parser Body Json
 app.use(bodyparser.json())
@@ -27,7 +32,9 @@ app.get('/', (req,res) => {
 app.use('/api-docs', express.static('./docs'))
 
 app.use('/auth', auth)
+app.use('/user', userController)
 
+app.use(middleware.formatrest)
 app.use(middleware.notFound)
 app.use(middleware.errorHandler)
 
