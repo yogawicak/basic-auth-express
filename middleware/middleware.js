@@ -17,6 +17,7 @@
  * Error logic dibikin sendiri pke res local
  */
 const jwt = require('jsonwebtoken')
+const User = require('../models/User')
 
 const formatrest = (req,res,next) => {
     const failResult = {
@@ -39,18 +40,14 @@ const formatrest = (req,res,next) => {
 }
 
 const checkTokenUser = async (req,res,next) => {
-    const header = req.get('authorization')
-    if (header) {
-        const token = header.split(' ')[1]
-        if (token) {
-            try {
-                const checkToken = await jwt.verify(token, process.env.JWT_TOKEN)
-            } catch (error) {
-                next(error)
-            }
-            next()
-        }
+    try {
+        const auth = req.get('authorization').split(' ')[1]
+        const {_id} = jwt.verify(auth,process.env.JWT_TOKEN)
+        const checkUser = await User.findById(_id)
+        res.locals.userData = checkUser
         next()
+    } catch (error) {
+        next(error)
     }
 }
 
@@ -61,7 +58,10 @@ const notFound = (req,res,next) => {
 } 
 
 const errorHandler = (error,req,res,next) => {
-    res.status(500)
+    if (res.statusCode !== 404) {
+        res.status(500)
+    }
+    // res.status(res.statusCode || 500)
     // console.log(res.statusCode)
     res.json({
         status:'error',
@@ -73,5 +73,6 @@ const errorHandler = (error,req,res,next) => {
 module.exports = {
     notFound,
     errorHandler,
-    formatrest
+    formatrest,
+    checkTokenUser,
 }

@@ -31,8 +31,12 @@ app.get('/', (req,res) => {
 })
 app.use('/api-docs', express.static('./docs'))
 
+
+//With middleware Check User Token
+app.use('/user', middleware.checkTokenUser ,userController)
+
+//No Middleware
 app.use('/auth', auth)
-app.use('/user', userController)
 
 app.use(middleware.formatrest)
 app.use(middleware.notFound)

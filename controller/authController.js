@@ -33,6 +33,7 @@ router.post('/signup', async (req,res,next) => {
                 const findIdByUsername = await User.findOne({username},{_id:1})
                 console.log(findIdByUsername)
                 res.locals.result = findIdByUsername
+                res.locals.messageSuccess = 'Success Create Account'
                 console.log(result)
                 next()
             }else{
@@ -83,65 +84,5 @@ router.post('/login', async (req,res,next) => {
     }
 })
 
-/**
- * @api {post} /auth/signup Create User Account
- * @apiName CreateUser
- * @apiGroup Auth
- *
- * @apiParam {username} username users min 5 max 20 required
- * @apiParam {email} email regex
- * @apiParam {password} password min 5 required
- * @apiParam {fullname} fullname bebas 
- * 
- * @apiParamExample Example Body:
- * 
- * {
-	"username":"aaaaaa",
-	"email":"123@gmail.com",
-	"password":"12345",
-	"fullname":"budidoremissss"
-    } 
- * 
- * @apiSuccess {Message} Created User.
- * @apiSuccess {data} Username data.
- * @apiSuccessExample Successfull Response:
- * {
-        "message": "User Created",
-        "data": {
-            "username": "aaaaaassssss"
-        }
-    }
- *
- * @apiErrorExample Error Response:
- * {
-    "message": "Username/Email Telah Digunakan",
-    "stack": "Error: Username/Email Telah Digunakan\n    at E:\\YOGA PUNYA\\backend\\jwt-pattern-cj\\controller\\authController.js:38:31\n    at processTicksAndRejections (internal/process/task_queues.js:97:5)"
-}
- * 
- */
-
-/**
- * @api {post} /auth/login Login User Account
- * @apiName LoginUser
- * @apiGroup Auth
- * 
- * @apiParam {username} pilih salah satu email / username
- * @apiParam {email} pilih salah satu email / username
- * @apiParam {password} password
- * 
- * @apiParamExample Example Body
- * {
-	"username":"budiasss26",
-	"email":"123@gmail.com",
-	"password":"12345"
-}
- * @apiErrorExample Error Response:
- * {
-    "message": "Check your username or password"
-}
- * 
- *
- * 
- */
 
 module.exports = router
