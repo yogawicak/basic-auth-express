@@ -32,9 +32,10 @@ router.post('/signup', async (req,res,next) => {
                 const {username} = await User.create(result)
                 const findIdByUsername = await User.findOne({username},{_id:1})
                 console.log(findIdByUsername)
-                res.locals.result = findIdByUsername
+                const payload = {_id:findIdByUsername,username:username}
+                const token = await jwt.sign(payload,process.env.JWT_TOKEN)
+                res.locals.result = {token:token}
                 res.locals.messageSuccess = 'Success Create Account'
-                console.log(result)
                 next()
             }else{
                 // const error = new Error('Username/Email Telah Digunakan');
